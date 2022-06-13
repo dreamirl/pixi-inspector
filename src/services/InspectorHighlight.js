@@ -4,7 +4,18 @@ export default class InspectorHighlight {
   constructor(inspector) {
     this.gui = inspector.gui;
     this.graphics = new overlay.PIXI.Graphics();
+    this.rendererSizeText = new overlay.PIXI.Text("", {
+      fontSize: 20,
+      fill: 0x007eff,
+    });
+    this.fixedSizeText = new overlay.PIXI.Text("", {
+      fontSize: 20,
+      fill: 0xff7f00,
+    });
+
     inspector.gui.container.addChild(this.graphics);
+    inspector.gui.container.addChild(this.fixedSizeText);
+    inspector.gui.container.addChild(this.rendererSizeText);
     // if (this.graphics.transform && this.graphics.transform.worldTransform) {
     //   this.defaultTransform = this.graphics.transform.worldTransform.clone()
     // }
@@ -13,9 +24,13 @@ export default class InspectorHighlight {
 
   update(_, renderer) {
     const box = this.graphics;
+    const fixedSizeText = this.fixedSizeText;
+    const rendererSizeText = this.rendererSizeText;
+
     const node = InspectorHighlight.node;
     if (node && node.parent) {
       box.visible = true;
+      rendererSizeText.visible = true;
       box.clear();
       // if (node.texture && node.transform && node.transform.worldTransform) {
       //   box.lineStyle(1, 0xffaa40, 1)
@@ -58,6 +73,11 @@ export default class InspectorHighlight {
         bounds.width * scale.x,
         bounds.height * scale.y
       );
+      rendererSizeText.position.set(
+        bounds.x * scale.x + 10,
+        bounds.y > 30 ? bounds.y * scale.y - 30 : bounds.y * scale.y + 10
+      );
+      rendererSizeText.text = `x:${bounds.x} y:${bounds.y} w:${bounds.width} h:${bounds.height}`;
 
       const offDisplay =
         bounds.x + bounds.width < 0 ||
@@ -75,9 +95,33 @@ export default class InspectorHighlight {
           bounds.x * scale.x + (bounds.width * scale.x) / 2,
           bounds.y * scale.y + (bounds.height * scale.y) / 2
         );
+      if (
+        node.hasOwnProperty("fixedWidth") &&
+        node.hasOwnProperty("fixedHeight")
+      ) {
+        box.beginFill(0xff7f00, 0.3);
+        box.lineStyle(1, 0xff7f00, 0.6);
+        box.drawRect(
+          node.x * scale.x,
+          node.y * scale.y,
+          node.fixedWidth * scale.x,
+          node.fixedHeight * scale.y
+        );
+
+        fixedSizeText.visible = true;
+        fixedSizeText.position.set(
+          node.x * scale.x + 10,
+          node.y > 30 ? node.y * scale.y - 30 : node.y * scale.y + 10
+        );
+        fixedSizeText.text = `x:${node.x} y:${node.y} w:${node.fixedWidth} h:${node.fixedHeight}`;
+      } else {
+        fixedSizeText.visible = false;
+      }
       box.endFill();
     } else {
       box.visible = false;
+      fixedSizeText.visible = false;
+      rendererSizeText.visible = false;
     }
   }
 
