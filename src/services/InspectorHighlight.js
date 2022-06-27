@@ -53,6 +53,17 @@ export default class InspectorHighlight {
       box.beginFill(0x007eff, 0.3);
       box.lineStyle(1, 0x007eff, 0.6);
       const bounds = node.getBounds();
+      let x = node.x;
+      let y = node.y;
+      let parent = node.parent;
+
+      while (parent !== null) {
+        x += parent.x;
+        y += parent.y;
+
+        parent = parent.parent;
+      }
+
       const canvasScale = InspectorHighlight.getHtmlElementScale(renderer.view);
 
       const scale = renderer.screen
@@ -102,18 +113,18 @@ export default class InspectorHighlight {
         box.beginFill(0xff7f00, 0.3);
         box.lineStyle(1, 0xff7f00, 0.6);
         box.drawRect(
-          node.x * scale.x,
-          node.y * scale.y,
+          x * scale.x,
+          y * scale.y,
           node.fixedWidth * scale.x,
           node.fixedHeight * scale.y
         );
 
         fixedSizeText.visible = true;
         fixedSizeText.position.set(
-          node.x * scale.x + 10,
-          node.y > 30 ? node.y * scale.y - 30 : node.y * scale.y + 10
+          x * scale.x + 10,
+          y > 30 ? y * scale.y - 30 : y * scale.y + 10
         );
-        fixedSizeText.text = `x:${node.x} y:${node.y} w:${node.fixedWidth} h:${node.fixedHeight}`;
+        fixedSizeText.text = `x:${x} y:${y} w:${node.fixedWidth} h:${node.fixedHeight}`;
       } else {
         fixedSizeText.visible = false;
       }
