@@ -2,3 +2,4 @@
 /typings
 /build
 *.iml
+.idea/
